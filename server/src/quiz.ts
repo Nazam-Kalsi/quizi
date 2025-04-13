@@ -15,7 +15,7 @@ interface Problems{
     options:{
         id:number;
         title:string
-    }
+    }[]
     startTime:number
     submission:Submission[];
 }
@@ -32,13 +32,15 @@ export class Quiz{
     private problems:Problems[];
     private activeProb:number;
     private users:Users[];
+    private currentState: 'ended' | 'notStarted' | 'leaderBoard' | 'question'
 
     constructor(roomId:string){
         this.roomId = roomId;
         this.hasStarted = false;
         this.problems = [];
         this.activeProb = 0;
-        this.users = []
+        this.users = [];
+        this.currentState = 'notStarted';
     }
 
     addProblem(problem:Problems){
@@ -54,7 +56,7 @@ export class Quiz{
         this.problems[0].submission = [];
     }
 
-    next(){
+    next(roomId:string){
         this.activeProb++;
         const problem = this.problems[this.activeProb];
         const io = IoManager.getIo();
@@ -68,9 +70,15 @@ export class Quiz{
             const io = IoManager.getIo();
 
             io.emit('quiz-ended',{
-                leaderBoard:this.getLeaderBoard().splice(0,10),
+                leaderBoard:this.getLeaderBoard()
             })
         }        
+    }
+
+    setActiveProblem(problem:Problems){
+        problem.startTime = new Date().getTime();
+        problem.submission = [];
+
     }
 
     addUser(name:string){
@@ -82,11 +90,7 @@ export class Quiz{
     }
 
     getLeaderBoard(){
-        return this.users.sort((a,b)=>{
-            if(a.points>b.points) return -1;
-            if(a.points<b.points) return 1;
-            return 0;
-        })
+        return this.users.sort((a,b)=>{return ( a.points<b.points?1:-1)}).splice(0,20);
     }
 
     submit(problemId:string,userId:string,submission:1|2|3|4){
@@ -109,5 +113,32 @@ export class Quiz{
         }
       }
     
+      getCurrentState(){
+            if(this.currentState === 'notStarted'){
+                return {
+                    state:'notStarted',
+                }
+
+            }
+            else if(this.currentState === 'leaderBoard'){
+                return {
+                    title:'leaderBoard',
+                    leaderBoard:this.getLeaderBoard()
+                }
+            }
+            else if( this.currentState === 'ended'){
+                return {
+                    title:'ended',
+                    leaderBoard:this.getLeaderBoard()
+                }
+            }
+            else{
+                return{
+                    title:'question',
+                    problem: this.problems[this.activeProb] 
+                }
+            }
+                
+      }
 
 }
