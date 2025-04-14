@@ -25,12 +25,17 @@ export class UserManager{
         });
 
         socket.on('admin-join',(data)=>{
-            const userId =  this.quizManager.addUser(data.name, data.roomId);
+            // const userId =  this.quizManager.addUser(data.name, data.roomId);
             if(data.password !== ADMIN_PASSWORD) return;
-            socket.emit('admin-init',{
-                userId,
-                state:this.quizManager.getCurrentState(roomId)
-            });
+            // socket.emit('admin-init',{
+            //     userId,
+            //     state:this.quizManager.getCurrentState(data.roomId)
+            // });
+
+            socket.on('create-quiz',(data)=>{
+                console.log(data);
+                    this.quizManager.createQuiz(data.roomId);
+            })
 
             socket.on('create-problem',(data)=>{
                 this.quizManager.addProblem(data.roomId,data.problem)
@@ -39,6 +44,7 @@ export class UserManager{
             socket.on('next',({roomId})=>{
                 this.quizManager.next(roomId)
             })
+
 
         })
 

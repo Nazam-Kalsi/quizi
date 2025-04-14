@@ -5,12 +5,14 @@ import { IoManager } from './managers/ioManager';
 
 
 const io = IoManager.getIo(); 
-io.on('connection', (client) => { 
-    client.on('event',(data)=>{
-        console.log(data)
-        const type = data.type;
 
-    })
- });
+io.on('connection', (socket:any) => { 
+        socket.emit('j',socket.id);
+
+        console.log("ID : ",socket.id)
+
+})
  
-io.listen(3000);
+io.listen(3000,()=>{
+    console.log("first")
+});

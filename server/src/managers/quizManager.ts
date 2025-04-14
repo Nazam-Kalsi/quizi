@@ -62,4 +62,11 @@ export class QuizManager {
     return quiz.getCurrentState();
   }
 
+  createQuiz(roomId:string){
+
+    const quiz = new Quiz(roomId);
+    this.quizes.push(quiz);
+
+  }
+
 }
